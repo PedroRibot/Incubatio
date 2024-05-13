@@ -1,0 +1,161 @@
+//#include "/Engine/Public/Platform.ush"
+//#include "/Engine/Private/Common.ush"
+//#include "/Engine/Private/ScreenPass.ush"
+
+//SCREEN_PASS_TEXTURE_VIEWPORT(ViewParams)
+
+//SamplerState InputSampler;
+//Texture2D SceneColor;
+//Texture2D InputTexture;
+//Texture2D<uint2> InputStencilTexture;
+//float4 Color;
+
+//float2 PosToUV(float2 Pos) {
+//	float2 ViewportUV = ((Pos - ViewParams_ViewportMin.xy) * ViewParams_ViewportSizeInverse.xy);
+//	return ViewportUV * ViewParams_UVViewportSize + ViewParams_UVViewportMin;
+//}
+
+//void UVMaskMainPS(float4 SvPosition : SV_POSITION, out float4 UVMask : SV_Target0, out float4 CopyColor : SV_Target1)
+//{
+//	uint2 stencil = InputStencilTexture.Load(uint3(SvPosition.xy, 0));
+//	float2 UV = PosToUV(SvPosition.xy);
+//	if (stencil.y == 1) {
+//		UVMask = float4(UV.x, UV.y, 0, 1);
+//	} else {
+//		UVMask = float4(0, 0, 0, 0);
+//	}
+
+//	CopyColor = SceneColor.SampleLevel(InputSampler, UV, 0);
+//}
+
+//float4 CombineMainPS(float4 SvPosition : SV_POSITION) : SV_Target0 {
+//	float2 UV = PosToUV(SvPosition.xy);
+//	float4 samp = Texture2DSample(InputTexture, InputSampler, UV);
+
+//	if (length(samp.xyz) > 0) {
+//		return Color;
+//	}
+//	return Texture2DSample(SceneColor, InputSampler, UV);
+//}
+
+
+
+#include "/Engine/Public/Platform.ush"
+#include "/Engine/Private/Common.ush"
+#include "/Engine/Private/ScreenPass.ush"
+
+
+SCREEN_PASS_TEXTURE_VIEWPORT(ViewParams)
+
+SamplerState InputSampler;
+Texture2D SceneColor;
+Texture2D InputTexture;
+Texture2D<uint2> InputStencilTexture;
+float4 Color;
+
+float2 PosToUV(float2 Pos)
+{
+    float2 ViewportUV = ((Pos - ViewParams_ViewportMin.xy) * ViewParams_ViewportSizeInverse.xy);
+    return ViewportUV * ViewParams_UVViewportSize + ViewParams_UVViewportMin;
+}
+
+void UVMaskMainPS(float4 SvPosition : SV_POSITION, out float4 UVMask : SV_Target0, out float4 CopyColor : SV_Target1)
+{
+    uint2 stencil = InputStencilTexture.Load(uint3(SvPosition.xy, 0));
+    float2 UV = PosToUV(SvPosition.xy);
+    
+    if (stencil.y == 1)
+    {
+        UVMask = float4(UV.x, UV.y, 0, 1);
+    }
+    else
+    {
+        UVMask = float4(0, 0, 0, 0);
+    }
+
+    CopyColor = SceneColor.SampleLevel(InputSampler, UV, 0);
+}
+
+float raymarch(float3 camPos, float3 rayDir)
+{
+    float depth = 0;
+
+    for (int i = 0; i < MAX_MARCHING_STEPS; i++)
+    {
+
+      	// Calculate next position along view ray
+        float3 pos = camPos + (rayDir * depth);
+
+        // Calcualte shortest distance to scene at position
+        float dist = sceneSDF(pos);
+
+        depth += dist;
+      	// finish when very close to a surface or when ray has travelled to far
+        if (dist <= EPSILON || depth > MAX_DIST)
+        {
+            break;
+        }
+    }
+    return depth;
+}
+
+float map(float3 p)
+{
+    return length(p) - 10;
+}
+
+float4 CombineMainPS(float4 SvPosition : SV_POSITION) : SV_Target0
+{
+    float2 UV = PosToUV(SvPosition.xy);
+    UV.y = 1 - UV.y;
+    UV = UV * 2 - 1;
+    UV.x *= ViewParams_ViewportMin.x / ViewParams_ViewportMin.x;
+    
+    
+    
+    //float2 CenteredUV = (UV * 2 - ViewParams_ViewportSize.xy) / ViewParams_ViewportSize.y;
+    //float2 UV = SvPositionToViewportUV(SvPosition);
+    //WorldRayDirection
+    
+    //float4 samp = Texture2DSample(InputTexture, InputSampler, UV);
+
+    
+    
+        //MY RAYMARCH 
+    //INIT
+    //float3 ro = PrimaryView.TranslatedWorldCameraOrigin;
+    //float3 ro = float3(0, 0, -3);
+    
+    //float3 ro = LWCHackToFloat(PrimaryView.TranslatedWorldCameraOrigin);
+    
+    //float3 rd = normalize(float3(UV, 1));
+
+    
+    //float3 col = float3(0, 0, 0);
+    
+    
+    //float t = 0;
+    
+    ////RAYMARCH
+    //for (int i = 0; i < 80; i++)
+    //{
+    //    float3 p = ro + rd * t;
+    //    float d = map(p);
+    //    t += d;
+    //}
+    
+    //col = float3(t, t, t) * 0.2;
+    
+    return float4(UV.x, UV.y, 0, 1);
+    
+    //return float4(col, 1);
+    
+    
+    
+    //float depth = raymarch(PrimaryView.TranslatedWorldCameraOrigin, RayDirection);
+    
+    //return Color;
+    
+    //RETURN THE STANDARD IMAGE
+    //return Texture2DSample(SceneColor, InputSampler, UV);
+}
