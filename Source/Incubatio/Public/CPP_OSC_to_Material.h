@@ -33,7 +33,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		FVector4 GetColumnFromMatrix(const FMatrix& Matrix, int32 ColumnIndex);
 	UFUNCTION(BlueprintCallable)
-		FMatrix CreateMatrixFromPositionRotation(const FVector& Position, const FQuat& Rotation);
+		FMatrix CreateMatrixFromPositionRotationScale(const FVector& Position, const FQuat& Rotation, const FVector& Scale);
 	UFUNCTION(BlueprintCallable)
 		FQuat AdaptRotations(const FQuat& originalRotation, int insideCount, float x, float y, float z, int bone);
 };

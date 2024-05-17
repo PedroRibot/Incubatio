@@ -114,12 +114,12 @@ FVector4 ACPP_OSC_to_Material::GetColumnFromMatrix(const FMatrix& Matrix, int32 
     //return FVector4(Matrix.M[RowIndex][0], Matrix.M[RowIndex][1], Matrix.M[RowIndex][2], Matrix.M[RowIndex][3]);
 }
 
-FMatrix ACPP_OSC_to_Material::CreateMatrixFromPositionRotation(const FVector& Position, const FQuat& Rotation) 
+FMatrix ACPP_OSC_to_Material::CreateMatrixFromPositionRotationScale(const FVector& Position, const FQuat& Rotation, const FVector& Scale)
 {
     
 
     // Create a transformation matrix using FTransform, which handles position, rotation, and scale.
-    FTransform Transform(Rotation, Position, FVector(1.0f, 1.0f, 1.0f)); // Scale set to 1
+    FTransform Transform(Rotation, Position, Scale); // Scale set to 1
 
     //FMatrix Matrix = FQuatRotationTranslationMatrix(Rotation, Position);
 
