@@ -22,10 +22,16 @@ uniform float camAngle;
 
 // light settings
 uniform vec3 lightPosition;
+uniform float shadowSmooth;
+uniform float shadowStrength;
 
 // background color
 uniform vec3 bgColor;
 uniform vec3 bgOcclusionColor;
+
+// fog limits
+uniform float fog_min_dist;
+uniform float fog_max_dist;
 
 // surface struct
 
@@ -876,6 +882,53 @@ float mandelbulb(vec3 p)
   return 0.35 * log(r) * r / dr;
 }
 
+float mandelbulb_v2(vec3 p, vec3 scale)
+{
+  vec3 c = p;
+  float r = length(c);
+  float dr = 1;
+  float xr =0;
+  float theta = 0;
+  float phi = 0 ;
+
+  for (int i = 0; i < 4 && r < 3; i++)
+  {
+    xr = pow(r, 7);
+    dr = 6 * xr * dr + 1;
+    theta = atan(c.y, c.x) * (scale.x + 1.0) ;
+    phi = asin(clamp(c.z / r, -1,1)) * (scale.y + 1.0) - scale.z;
+    r = xr * r;
+    c = r * vec3(cos(phi) * cos(theta), cos(phi) * sin(theta), sin(phi));
+   
+    c += p;
+    r = length(c);
+  }
+
+  return 0.35 * log(r) * r / dr;
+}
+
+float mandelbulbSDF( vec3 p, float power ) {
+	vec3 w = p;
+    float m = dot(w,w);
+	float dz = 1.0;
+
+	for( int i=0; i<3; i++ )
+    {
+        dz = power*pow(sqrt(m), power - 1.0 )*dz + 1.0;
+
+        float r = length(w);
+        float b = power*acos( w.y/r);
+        float a = power*atan( w.x, w.z );
+        w = p + pow(r,power) * vec3( sin(b)*sin(a), cos(b), sin(b)*cos(a) );
+
+        m = dot(w,w);
+		if( m > 256.0 )
+            break;
+    }
+
+    return 0.25*log(m)*sqrt(m)/dz;
+}
+
 // DE: Infinitely tiled Menger IFS.
 //
 // For more info on KIFS, see:
@@ -1077,6 +1130,45 @@ float evolvingFractal2(vec3 pt) {
 }
 
 
+float julia(vec3 pos, vec3 scale)
+{
+    int iter_count = int(scale.y);
+    float delta = scale.z;
+
+
+    //float delta = sin(vectorTime.y / 2.0) / 4.0;
+    vec4 c = vec4(-0.2, -.6, delta, 0.0);
+    vec4 z = vec4(pos, 0.0);
+    vec4 nz;
+
+    float dr2   = 1.0;
+    float r2    = dot(z,z);
+
+    for(int i = 0; i < iter_count; i++)
+    {
+        /*
+        dr2    *= 4.0 * r2;
+        nz.x    = z.x * z.x - dot(z.yzw, z.yzw);
+        nz.yzw  = 2.0 * z.x * z.yzw;
+        */
+        
+        dr2    *= scale.x * r2;
+        nz.x    = z.x * z.x - dot(z.yzw, z.yzw);
+        nz.yzw  = scale.x / 2.0 * z.x * z.yzw;
+
+        z = nz + c;
+
+        r2 = dot(z, z);
+        if(r2 > 4.0) {
+            break; 
+        }
+    }
+
+    return 0.25 * sqrt(r2 / dr2) * log(r2);
+}
+
+
+
 /**
  * Signed distance function describing the scene.
  * 
@@ -1202,9 +1294,9 @@ float sceneSDF(vec3 samplePoint)
         {
             distObjects = poly_smin( distObjects, kaliBox((objectTransforms[oI] * samplePoint4D).xyz), objectSmoothings[oI] ); 
         }        
-        else if(objectPrimitives[oI] == 8) // mandelbulb
+        else if(objectPrimitives[oI] == 8) // mandelbulb_v2
         {
-            distObjects = poly_smin( distObjects, mandelbulb((objectTransforms[oI] * samplePoint4D).xyz), objectSmoothings[oI] ); 
+            distObjects = poly_smin( distObjects, mandelbulb_v2((objectTransforms[oI] * samplePoint4D).xyz, objectSizes[oI]), objectSmoothings[oI] ); 
         }                
         else if(objectPrimitives[oI] == 9) // merger
         {
@@ -1230,6 +1322,15 @@ float sceneSDF(vec3 samplePoint)
         {
             distObjects = poly_smin( distObjects, evolvingFractal2((objectTransforms[oI] * samplePoint4D).xyz), objectSmoothings[oI] ); 
         }      
+        else if(objectPrimitives[oI] == 15) // mandelbulbSDF
+        {
+            distObjects = poly_smin( distObjects, mandelbulbSDF((objectTransforms[oI] * samplePoint4D).xyz, objectSizes[oI].x), objectSmoothings[oI] ); 
+        }
+        else if(objectPrimitives[oI] == 16) // julia
+        {
+            distObjects = poly_smin( distObjects, julia((objectTransforms[oI] * samplePoint4D).xyz, objectSizes[oI]), objectSmoothings[oI] ); 
+        }        
+
     }
     
     float distJointEdges = 1000.0;
@@ -1383,9 +1484,9 @@ Surface sceneSDF_surface(vec3 samplePoint)
         {
             distObjects = poly_smin( distObjects, kaliBox((objectTransforms[oI] * samplePoint4D).xyz), objectSmoothings[oI] ); 
         }
-        else if(objectPrimitives[oI] == 8) // mandelbulb
+        else if(objectPrimitives[oI] == 8) // mandelbulb_v2
         {
-            distObjects = poly_smin( distObjects, mandelbulb((objectTransforms[oI] * samplePoint4D).xyz), objectSmoothings[oI] ); 
+            distObjects = poly_smin( distObjects, mandelbulb_v2((objectTransforms[oI] * samplePoint4D).xyz, objectSizes[oI]), objectSmoothings[oI] ); 
         }
         else if(objectPrimitives[oI] == 9) // merger
         {
@@ -1410,7 +1511,15 @@ Surface sceneSDF_surface(vec3 samplePoint)
         else if(objectPrimitives[oI] == 14) // evolvingFractal2
         {
             distObjects = poly_smin( distObjects, evolvingFractal2((objectTransforms[oI] * samplePoint4D).xyz), objectSmoothings[oI] ); 
-        } 
+        }
+        else if(objectPrimitives[oI] == 15) // mandelbulbSDF
+        {
+            distObjects = poly_smin( distObjects, mandelbulbSDF((objectTransforms[oI] * samplePoint4D).xyz, objectSizes[oI].x), objectSmoothings[oI] ); 
+        }
+        else if(objectPrimitives[oI] == 16) // julia
+        {
+            distObjects = poly_smin( distObjects, julia((objectTransforms[oI] * samplePoint4D).xyz, objectSizes[oI]), objectSmoothings[oI] ); 
+        }   
         
         Surface tmpSurface = Surface(objectColors[oI], objectAmbientScales[oI], objectDiffuseScales[oI], objectSpecularScales[oI], objectSpecularPows[oI], objectOcclusionScales[oI], objectOcclusionRanges[oI], objectOcclusionResolutions[oI], objectOcclusionColors[oI], distObjects);
         objectSurface = union_surface(tmpSurface, objectSurface, objectSmoothings[oI]);
@@ -1626,6 +1735,36 @@ vec3 phongContribForLight(vec3 p, vec3 eye, vec3 lightPos, vec3 diffuseColor, fl
     return diffuseScale * diffuseColor * dotLN + specularScale * specularColor * pow(dotRV, specularPow);
 }
 
+float hardShadow( vec3 lightPoint, vec3 lightToSurfaceDir, float mint, float maxt )
+{
+    for( float t=mint; t < maxt; )
+    {
+        float h = sceneSDF(lightPoint + lightToSurfaceDir*t);
+        if( h<0.002 )
+            return 0.0;
+        t += h;
+    }
+    return 1.0;
+}
+
+float softShadow( vec3 lightPoint, vec3 lightToSurfaceDir, float mint, float maxt, float k )
+{
+    float res = 1.0;
+
+    for( float t=mint; t < maxt; )
+    {
+        float h = sceneSDF(lightPoint + lightToSurfaceDir*t);
+        if( h<0.002 )
+            return 0.0;
+
+        res = min( res, k*h/t );
+
+        //t += clamp( h, 0.02, 0.04);
+
+        t += h / 10.0;
+    }
+    return res;
+}
 
 /**
  * Return a transform matrix that will transform a ray from view space
@@ -1671,7 +1810,21 @@ void main()
     vec3 p = eye + dist * worldDir;
     
     vec3 color1 = surface.color * surface.ambientScale;
-    color1 += phongContribForLight(p, eye, lightPosition, surface.color, surface.diffuseScale, surface.color, surface.specularScale, surface.specularPow );
+    
+    // soft shadows
+    float lightStrength = 1.0;
+    
+    if(shadowStrength > 0.0)
+    {
+        vec3 lightToSurfaceVec = p - lightPosition;
+        float lightToSurfaceDist = length(lightToSurfaceVec);
+        vec3 lightToSurfaceDir = normalize(lightToSurfaceVec);
+        //lightStrength = hardShadow(lightPosition, lightToSurfaceDir, 0.0, lightToSurfaceDist - 0.01);
+        lightStrength = softShadow(lightPosition, lightToSurfaceDir, 0.0, lightToSurfaceDist- 1.0, shadowSmooth);
+        lightStrength = (1.0 - shadowStrength) + lightStrength * shadowStrength;
+    }
+
+    color1 += phongContribForLight(p, eye, lightPosition, surface.color, surface.diffuseScale, surface.color, surface.specularScale, surface.specularPow ) * lightStrength;
     
     // ambient occlusion
     vec3 colorDiff = color1 - surface.occlusionColor;
@@ -1686,6 +1839,10 @@ void main()
    	
    	vec3 color2 = vec3(color1.r - occlusionStrength * colorDiff.r, color1.g - occlusionStrength * colorDiff.g , color1.b - occlusionStrength * colorDiff.b);
    	
-    fragColor = vec4(color2, 1.0);
-
+   	// distance fog
+   	float fog_dist = clamp((dist - fog_min_dist) / (fog_max_dist - fog_min_dist), 0.0, 1.0);
+   	
+   	vec3 color3 = fog_dist * bgColor + (1.0 - fog_dist) * color2;
+   	
+    fragColor = vec4(color3, 1.0);
 }

@@ -30,10 +30,16 @@ class Visualization():
         
         # light settings
         self.lightPosition = np.array([1.0, 0.0, 0.0])
+        self.shadowSmooth = 16.0;
+        self.shadowStrength = 0.0;
         
         # background settings
         self.bgColor = np.array([0.0, 0.0, 0.0])
         self.bgOcclusionColor = np.array([0.0, 0.0, 0.0])
+        
+        # fog settings
+        self.fogMinDist = 99.0
+        self.fogMaxDist = 100
         
         # skeleton joint settings
         self.jointColor = np.array([1.0, 1.0, 1.0])
@@ -143,10 +149,16 @@ class Visualization():
         
         # light settings
         self.shader_lightPosition = gl.glGetUniformLocation(self.program, "lightPosition")
+        self.shader_shadowSmooth = gl.glGetUniformLocation(self.program, "shadowSmooth")
+        self.shader_shadowStrength = gl.glGetUniformLocation(self.program, "shadowStrength")
         
         # background settings
         self.shader_bgColor = gl.glGetUniformLocation(self.program, "bgColor")
         self.shader_bgOcclusionColor = gl.glGetUniformLocation(self.program, "bgOcclusionColor")
+        
+        # fog settings
+        self.shader_fogMinDist = gl.glGetUniformLocation(self.program, "fog_min_dist")
+        self.shader_fogMaxDist = gl.glGetUniformLocation(self.program, "fog_max_dist")
         
         # skeleton joint settings
         self.shader_jointColor = gl.glGetUniformLocation(self.program, "jointColor")
@@ -222,10 +234,16 @@ class Visualization():
         
         # light settings
         gl.glUniform3f(self.shader_lightPosition, *self.lightPosition.tolist())
+        gl.glUniform1f(self.shader_shadowSmooth, self.shadowSmooth);
+        gl.glUniform1f(self.shader_shadowStrength, self.shadowStrength);
 
         # background settings
         gl.glUniform3f(self.shader_bgColor, *self.bgColor.tolist())
         gl.glUniform3f(self.shader_bgOcclusionColor, *self.bgOcclusionColor.tolist())
+        
+        # fog settings
+        gl.glUniform1f(self.shader_fogMinDist, self.fogMinDist);
+        gl.glUniform1f(self.shader_fogMaxDist, self.fogMaxDist);
         
         # skeleton joint settings
         gl.glUniform3f(self.shader_jointColor, *self.jointColor.tolist())
@@ -499,11 +517,26 @@ class Visualization():
     def setLightPosition(self, position):
         self.lightPosition = position
         
+    def setShadowStrength(self, strength):
+        self.shadowStrength = strength;
+        
+    def setShadowSmooth(self, smooth):
+        self.shadowSmooth = smooth;
+        
+    def setShadowSoftHardMixFactor(self, factor):
+        self.shadowSoftHardMixFactor = factor;
+        
     def setBGColor(self, color):
         self.bgColor = color
 
     def setBGOcclusionColor(self, color):
         self.bgOcclusionColor = color
+        
+    def setFogMinDist(self, dist):
+        self.fogMinDist = dist
+        
+    def setFogMaxDist(self, dist):
+        self.fogMaxDist = dist
         
     def setJointColor(self, color):
         self.jointColor = color       

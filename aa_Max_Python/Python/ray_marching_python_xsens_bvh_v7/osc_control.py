@@ -25,9 +25,14 @@ class OscControl():
         self.dispatcher.map("/vis/camangle", self.setVisCamAngle)
         
         self.dispatcher.map("/vis/lightposition", self.setVisLightPosition)
+        self.dispatcher.map("/vis/shadowsmooth", self.setVisShadowSmooth)
+        self.dispatcher.map("/vis/shadowstrength", self.setVisShadowStrength)
         
         self.dispatcher.map("/vis/bgcolor", self.setVisBGColor)
         self.dispatcher.map("/vis/bgocclusioncolor", self.setVisBGOcclusionColor)
+        
+        self.dispatcher.map("/vis/fogmindist", self.setVisFogMinDist)
+        self.dispatcher.map("/vis/fogmaxdist", self.setVisFogMaxDist)
         
         self.dispatcher.map("/vis/jointcolor", self.setVisJointColor)
         self.dispatcher.map("/vis/jointambientscale", self.setVisJointAmbientScale)
@@ -166,6 +171,18 @@ class OscControl():
         
         self.visualization.setLightPosition(position)
         
+    def setVisShadowSmooth(self, address, *args):
+        
+        smooth = args[0]
+
+        self.visualization.setShadowSmooth(smooth)
+        
+    def setVisShadowStrength(self, address, *args):
+        
+        strength = args[0]
+
+        self.visualization.setShadowStrength(strength)
+
     def setVisBGColor(self, address, *args):
         
         color = np.array(args)
@@ -177,6 +194,23 @@ class OscControl():
         color = np.array(args)
         
         self.visualization.setBGOcclusionColor(color)
+
+    def setVisFogMinDist(self, address, *args):
+        
+        dist = args[0]
+
+        self.visualization.setFogMinDist(dist)
+        
+        #print("setVisFogMinDist ", dist)
+        
+    def setVisFogMaxDist(self, address, *args):
+        
+        dist = args[0]
+
+        self.visualization.setFogMaxDist(dist)
+        
+        #print("setVisFogMaxDist ", dist)
+
         
     def setVisJointColor(self, address, *args):
 
