@@ -14,12 +14,15 @@ class Visualization():
         self.fragmentCode = fragmentCode
         self.resolution = [1280.0, 720.0]
         
-        self.jointCount = skeleton.getJointCount()
-        self.edgeCount = skeleton.getEdgeCount()
+        #self.jointCount = skeleton.getJointCount()
+        #self.edgeCount = skeleton.getEdgeCount()
+        
+        self.jointCount = 23
+        self.edgeCount = 22
         self.objectCount = 10;
         
-        self.shader_jointCount = 28;
-        self.shader_edgeCount = 27;
+        self.shader_jointCount = 23;
+        self.shader_edgeCount = 22;
         self.shader_objectCount = 10;
         
         self.skelPosition = np.array([0.0, 0.0, 0.0])

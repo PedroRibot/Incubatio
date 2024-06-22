@@ -6,8 +6,8 @@ const float MAX_DIST = 100.0;
 const float EPSILON = 0.0001;
 const float PI = 3.1415926535897932384626433832795; // there is no PI defined in GLSL?
 
-const int jointCount = 28;
-const int edgeCount = 27;
+const int jointCount = 23;
+const int edgeCount = 22;
 const int objectCount = 10;
 
 uniform float iGlobalTime;
@@ -896,7 +896,8 @@ float mandelbulb_v2(vec3 p, vec3 scale)
     xr = pow(r, 7);
     dr = 6 * xr * dr + 1;
     theta = atan(c.y, c.x) * (scale.x + 1.0) ;
-    phi = asin(clamp(c.z / r, -1,1)) * (scale.y + 1.0) - scale.z;
+    //phi = asin(clamp(c.z / r, -1,1)) * (scale.y + 1.0) - scale.z;
+    phi = asin(clamp(c.z / r, -1,1)) * (scale.y + 1.0) - vectorTime.y / 10.0;
     r = xr * r;
     c = r * vec3(cos(phi) * cos(theta), cos(phi) * sin(theta), sin(phi));
    
@@ -1296,7 +1297,7 @@ float sceneSDF(vec3 samplePoint)
         }        
         else if(objectPrimitives[oI] == 8) // mandelbulb_v2
         {
-            distObjects = poly_smin( distObjects, mandelbulb_v2((objectTransforms[oI] * samplePoint4D).xyz, objectSizes[oI]), objectSmoothings[oI] ); 
+            distObjects = poly_smin( distObjects, mandelbulb_v2(((objectTransforms[oI] * samplePoint4D).xyz) * 0.2, objectSizes[oI]), objectSmoothings[oI] ) / 0.2; 
         }                
         else if(objectPrimitives[oI] == 9) // merger
         {
@@ -1486,7 +1487,7 @@ Surface sceneSDF_surface(vec3 samplePoint)
         }
         else if(objectPrimitives[oI] == 8) // mandelbulb_v2
         {
-            distObjects = poly_smin( distObjects, mandelbulb_v2((objectTransforms[oI] * samplePoint4D).xyz, objectSizes[oI]), objectSmoothings[oI] ); 
+            distObjects = poly_smin( distObjects, mandelbulb_v2((objectTransforms[oI] * samplePoint4D).xyz * 0.2, objectSizes[oI]), objectSmoothings[oI] ) / 0.2; 
         }
         else if(objectPrimitives[oI] == 9) // merger
         {
