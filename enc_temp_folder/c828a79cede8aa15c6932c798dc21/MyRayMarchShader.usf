@@ -44,23 +44,6 @@
 #include "/Engine/Private/Common.ush"
 #include "/Engine/Private/ScreenPass.ush"
 
-#include "/Engine/Private/SceneTexturesCommon.ush"
-#include "/Engine/Private/EyeAdaptationCommon.ush"
-#include "/Engine/Private/Random.ush"
-#include "/Engine/Private/SobolRandom.ush"
-#include "/Engine/Private/MonteCarlo.ush"
-#include "/Engine/Generated/UniformBuffers/Material.ush"
-#include "/Engine/Private/DepthOfFieldCommon.ush"
-#include "/Engine/Private/CircleDOFCommon.ush"
-#include "/Engine/Private/DistanceField/GlobalDistanceFieldShared.ush"
-#include "/Engine/Private/PhysicsFieldSampler.ush"
-#include "/Engine/Private/SceneData.ush"
-#include "/Engine/Private/HairShadingCommon.ush"
-#include "/Engine/Private/HairStrands/HairCardsAttributeCommon.ush"
-#include "/Engine/Private/HairStrands/HairStrandsAttributeCommon.ush"
-#include "/Engine/Private/DeferredShadingCommon.ush"
-#include "/Engine/Private/SparseVolumeTexture/SparseVolumeTextureCommon.ush"
-
 
 SCREEN_PASS_TEXTURE_VIEWPORT(ViewParams)
 

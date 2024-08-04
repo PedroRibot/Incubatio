@@ -1,5 +1,6 @@
- // Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
+using System.IO;
 using UnrealBuildTool;
 
 public class Incubatio : ModuleRules
@@ -8,9 +9,12 @@ public class Incubatio : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "ShaderModule" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "Renderer", "RenderCore", "RHI", "ShaderModule" });
 
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
+        string EnginePath = Path.GetFullPath(Target.RelativeEnginePath);
+        PublicIncludePaths.Add(EnginePath + "Source/Runtime/Renderer/Private");
+
+        PrivateDependencyModuleNames.AddRange(new string[] {  });
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

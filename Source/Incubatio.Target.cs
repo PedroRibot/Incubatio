@@ -11,6 +11,6 @@ public class IncubatioTarget : TargetRules
 		DefaultBuildSettings = BuildSettingsVersion.V4;
 
 		ExtraModuleNames.AddRange( new string[] { "Incubatio", "ShaderModule" } );
-        //ExtraModuleNames.Add("ShaderModule");
+        ExtraModuleNames.Add("ShaderModule");
     }
 }
