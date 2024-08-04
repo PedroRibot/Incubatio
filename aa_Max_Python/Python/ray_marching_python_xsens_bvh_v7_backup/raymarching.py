@@ -99,7 +99,7 @@ class MinimalGLWidget(QOpenGLWindow):
         self.visualization.setupShader(gl)
 
         self.renderTimer = QtCore.QTimer(self)
-        self.renderTimer.setInterval(40)
+        self.renderTimer.setInterval(1) # 40
         self.renderTimer.timeout.connect(self.onRenderTimer)
         self.renderTimer.start()
         
