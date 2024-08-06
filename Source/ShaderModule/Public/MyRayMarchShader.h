@@ -20,11 +20,13 @@ public:
 };
 
 BEGIN_SHADER_PARAMETER_STRUCT(FCombineShaderParameters, )
-	SHADER_PARAMETER(FLinearColor, Color)
+	//SHADER_PARAMETER(FLinearColor, Color)
 	SHADER_PARAMETER_RDG_TEXTURE(Texture2D, SceneColor)
 	SHADER_PARAMETER_RDG_TEXTURE(Texture2D, InputTexture)
+	SHADER_PARAMETER_RDG_TEXTURE(Texture2D, DataTexture)
 	SHADER_PARAMETER_SAMPLER(SamplerState, InputSampler)
 	SHADER_PARAMETER_STRUCT(FScreenPassTextureViewportParameters, ViewParams)
+	//SHADER_PARAMETER(FVector3f, CameraPos)
 	RENDER_TARGET_BINDING_SLOTS()
 END_SHADER_PARAMETER_STRUCT()
 

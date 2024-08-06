@@ -19,11 +19,6 @@
 			"Name": "RayMarchingShader",
 			"Type": "Runtime",
 			"LoadingPhase": "PostConfigInit"
-		},
-		{
-			"Name": "MyComputeShaders",
-			"Type": "Runtime",
-			"LoadingPhase": "PostConfigInit"
 		}
 	]
 }

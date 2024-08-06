@@ -13,6 +13,7 @@ public class Incubatio : ModuleRules
 
         string EnginePath = Path.GetFullPath(Target.RelativeEnginePath);
         PublicIncludePaths.Add(EnginePath + "Source/Runtime/Renderer/Private");
+        PublicIncludePaths.AddRange(new string[] { "Incubatio/Shaders" });
 
         PrivateDependencyModuleNames.AddRange(new string[] {  });
 

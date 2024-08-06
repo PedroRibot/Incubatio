@@ -1,11 +1,17 @@
 #pragma once
 
 #include "SceneViewExtension.h"
+#include "PostProcess/PostProcessing.h"
 
 class SHADERMODULE_API FMyViewExtension : public FSceneViewExtensionBase {
-	FLinearColor HighlightColor;
+	FRHITexture* DataTexture;
+	FScreenPassRenderTarget SceneColorCopyRenderTarget;
+	FScreenPassRenderTarget UVMaskRenderTarget;
+	FRDGTextureRef DataTextureRDG;
+	bool initialised;
 public:
-	FMyViewExtension(const FAutoRegister& AutoRegister, FLinearColor CustomColor);
+	FMyViewExtension(const FAutoRegister& AutoRegister, FRHITexture* Texture);
+	void UpdateTexture(FRHITexture* Texture);
 
 	//~ Begin FSceneViewExtensionBase Interface
 	virtual void SetupViewFamily(FSceneViewFamily& InViewFamily) override {};

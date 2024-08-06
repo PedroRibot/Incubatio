@@ -41,8 +41,18 @@ FScreenPassTextureViewportParameters GetTextureViewportParameters(const FScreenP
 }
 
 
-FMyViewExtension::FMyViewExtension(const FAutoRegister& AutoRegister, FLinearColor CustomColor) : FSceneViewExtensionBase(AutoRegister) {
-	HighlightColor = CustomColor;
+FMyViewExtension::FMyViewExtension(const FAutoRegister& AutoRegister, FRHITexture* Texture) :
+	FSceneViewExtensionBase(AutoRegister)
+{
+	DataTexture = Texture;
+	//CameraPos = CameraPos;
+
+	initialised = false;
+}
+
+void FMyViewExtension::UpdateTexture(FRHITexture* Texture) 
+{
+	//DataTexture = Texture;
 }
 
 void FMyViewExtension::PrePostProcessPass_RenderThread(FRDGBuilder& GraphBuilder, const FSceneView& View, const FPostProcessingInputs& Inputs) {
@@ -60,10 +70,14 @@ void FMyViewExtension::PrePostProcessPass_RenderThread(FRDGBuilder& GraphBuilder
 	const FScreenPassTextureViewportParameters SceneTextureViewportParams = GetTextureViewportParameters(SceneColorTextureViewport);
 
 	// Render targets
-	FScreenPassRenderTarget SceneColorCopyRenderTarget;
-	SceneColorCopyRenderTarget.Texture = GraphBuilder.CreateTexture((*Inputs.SceneTextures)->SceneColorTexture->Desc, TEXT("Scene Color Copy"));
-	FScreenPassRenderTarget UVMaskRenderTarget;
-	UVMaskRenderTarget.Texture = GraphBuilder.CreateTexture((*Inputs.SceneTextures)->SceneColorTexture->Desc, TEXT("UV Mask"));
+	if (initialised == false)
+	{
+		SceneColorCopyRenderTarget.Texture = GraphBuilder.CreateTexture((*Inputs.SceneTextures)->SceneColorTexture->Desc, TEXT("Scene Color Copy"));
+		UVMaskRenderTarget.Texture = GraphBuilder.CreateTexture((*Inputs.SceneTextures)->SceneColorTexture->Desc, TEXT("UV Mask"));
+		DataTextureRDG = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(DataTexture, TEXT("DataTexture")));
+
+		initialised = true;
+	}
 
 	// Shader setup
 	TShaderMapRef<FUVMaskShaderPS> UVMaskPixelShader(GlobalShaderMap);
@@ -89,9 +103,12 @@ void FMyViewExtension::PrePostProcessPass_RenderThread(FRDGBuilder& GraphBuilder
 	CombineParameters->SceneColor = SceneColorCopyRenderTarget.Texture;
 	CombineParameters->InputTexture = UVMaskRenderTarget.Texture;
 	CombineParameters->InputSampler = TStaticSamplerState<SF_Point, AM_Clamp, AM_Clamp, AM_Clamp>::GetRHI();
-	CombineParameters->Color = HighlightColor;
+	CombineParameters->DataTexture = DataTextureRDG;
+	//CombineParameters->Color = HighlightColor;
 	CombineParameters->ViewParams = SceneTextureViewportParams;
 	CombineParameters->RenderTargets[0] = FRenderTargetBinding(SceneColor.Texture, ERenderTargetLoadAction::ELoad);
+
+	/*CombineParameters->CameraPos = CameraPos;*/
 
 	FPixelShaderUtils::AddFullscreenPass(
 		GraphBuilder,

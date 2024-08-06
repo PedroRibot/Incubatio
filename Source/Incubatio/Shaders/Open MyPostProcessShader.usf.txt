@@ -1,0 +1,17 @@
+// MyPostProcessShader.usf
+Texture2D MyTexture;
+SamplerState MyTextureSampler;
+
+struct VS_OUT
+{
+    float2 TexCoord : TEXCOORD0;
+};
+
+float4 MainPS(VS_OUT Input) : SV_Target
+{
+    float2 UV = Input.TexCoord;
+    float4 Color = MyTexture.Sample(MyTextureSampler, UV);
+    return Color;
+}
+
+Unsupported format when creating Texture2D from TextureRenderTarget2D. Supported formats are B8G8R8A8, FloatRGBA and G8.

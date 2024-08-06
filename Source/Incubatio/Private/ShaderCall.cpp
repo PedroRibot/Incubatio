@@ -3,6 +3,7 @@
 
 #include "ShaderCall.h"
 #include "MyViewExtension.h"
+#include "Camera/PlayerCameraManager.h"
 
 // Sets default values
 AShaderCall::AShaderCall()
@@ -16,7 +17,7 @@ AShaderCall::AShaderCall()
 void AShaderCall::BeginPlay()
 {
 	Super::BeginPlay();
-	MyViewExtension = FSceneViewExtensions::NewExtension<FMyViewExtension>(FLinearColor::Green);
+	//MyViewExtension = FSceneViewExtensions::NewExtension<FMyViewExtension>(FLinearColor::Green);
 }
 
 // Called every frame
