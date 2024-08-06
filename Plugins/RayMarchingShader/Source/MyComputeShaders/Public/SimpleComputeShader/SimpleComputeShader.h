@@ -30,6 +30,7 @@ struct MYCOMPUTESHADERS_API FSimpleComputeShaderDispatchParams
 // This is a public interface that we define so outside code can invoke our compute shader.
 class MYCOMPUTESHADERS_API FSimpleComputeShaderInterface {
 public:
+
 	// Executes this shader on the render thread
 	static void DispatchRenderThread(
 		FRHICommandListImmediate& RHICmdList,

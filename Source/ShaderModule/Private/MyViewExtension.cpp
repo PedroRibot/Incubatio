@@ -70,14 +70,11 @@ void FMyViewExtension::PrePostProcessPass_RenderThread(FRDGBuilder& GraphBuilder
 	const FScreenPassTextureViewportParameters SceneTextureViewportParams = GetTextureViewportParameters(SceneColorTextureViewport);
 
 	// Render targets
-	if (initialised == false)
-	{
-		SceneColorCopyRenderTarget.Texture = GraphBuilder.CreateTexture((*Inputs.SceneTextures)->SceneColorTexture->Desc, TEXT("Scene Color Copy"));
-		UVMaskRenderTarget.Texture = GraphBuilder.CreateTexture((*Inputs.SceneTextures)->SceneColorTexture->Desc, TEXT("UV Mask"));
-		DataTextureRDG = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(DataTexture, TEXT("DataTexture")));
+	SceneColorCopyRenderTarget.Texture = GraphBuilder.CreateTexture((*Inputs.SceneTextures)->SceneColorTexture->Desc, TEXT("Scene Color Copy"));
+	UVMaskRenderTarget.Texture = GraphBuilder.CreateTexture((*Inputs.SceneTextures)->SceneColorTexture->Desc, TEXT("UV Mask"));
+	DataTextureRDG = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(DataTexture, TEXT("DataTexture")));
 
-		initialised = true;
-	}
+		
 
 	// Shader setup
 	TShaderMapRef<FUVMaskShaderPS> UVMaskPixelShader(GlobalShaderMap);

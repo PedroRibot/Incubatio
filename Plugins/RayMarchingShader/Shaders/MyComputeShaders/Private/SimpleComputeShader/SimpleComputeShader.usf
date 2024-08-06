@@ -1,7 +1,49 @@
 #include "/Engine/Public/Platform.ush"
 
+#define  MAX_MARCHING_STEPS 255
+#define  MIN_DIST 0.0
+#define  MAX_DIST 100.0
+#define  EPSILON 0.0001
+
 RWTexture2D<float3> RenderTarget;
-RWTexture2D<float4> DataTexture;
+Texture2D<float4> DataTexture;
+
+//SamplerState DataSampler;
+float sphereSDF(float3 samplePoint)
+{
+    return length(samplePoint) - 1.0;
+}
+
+float sceneSDF(float3 samplePoint)
+{
+    return sphereSDF(samplePoint);
+}
+
+float shortestDistanceToSurface(float3 eye, float3 marchingDirection, float start, float end)
+{
+    float depth = start;
+    for (int i = 0; i < MAX_MARCHING_STEPS; i++)
+    {
+        float dist = sceneSDF(eye + depth * marchingDirection);
+        if (dist < EPSILON)
+        {
+            return depth;
+        }
+        depth += dist;
+        if (depth >= end)
+        {
+            return end;
+        }
+    }
+    return end;
+}
+
+float3 rayDirection(float fieldOfView, float2 size, float2 fragCoord)
+{
+    float2 xy = fragCoord - size / 2.0;
+    float z = size.y / tan(radians(fieldOfView) / 2.0);
+    return normalize(float3(xy, -z));
+}
 
 
 [numthreads(THREADS_X, THREADS_Y, THREADS_Z)]
@@ -9,10 +51,30 @@ void SimpleComputeShader(
 	uint3 DispatchThreadId : SV_DispatchThreadID,
 	uint GroupIndex : SV_GroupIndex )
 {
-	// Simple checkerboard
-	int x = floor(DispatchThreadId.x / 16.f);
-	int y = floor(DispatchThreadId.y / 16.f);
-	int c = (x + y % 2) % 2;
+	//// Simple checkerboard
+	//int x = floor(DispatchThreadId.x / 16.f);
+	//int y = floor(DispatchThreadId.y / 16.f);
+	//int c = (x + y % 2) % 2;
 	
-    RenderTarget[DispatchThreadId.xy] = float3(DataTexture[DispatchThreadId.xy].rgb);
+ //   //float color = DataTexture.Load(int3(0, 2, 0)).r;
+ //   //float3 color = float3(0.5f, 0.2f, 0.1f);
+ //   float3 color = float3(float(DispatchThreadId.x % 256) / 256, float(DispatchThreadId.y % 256) / 256, 0);
+	
+ //   RenderTarget[DispatchThreadId.xy] = DataTexture.Load(int3(DispatchThreadId.x % 128, DispatchThreadId.y % 128, 0));
+    
+    
+
+    float3 dir = rayDirection(45.0, float2(1024, 1024), DispatchThreadId.xy);
+    float3 eye = float3(0.0, 0.0, 5.0);
+    float dist = shortestDistanceToSurface(eye, dir, MIN_DIST, MAX_DIST);
+    
+    if (dist > MAX_DIST - EPSILON)
+    {
+    // Didn't hit anything
+        RenderTarget[DispatchThreadId.xy] = float3(0.0, 0.0, 0.0);
+        return;
+    }
+    
+    RenderTarget[DispatchThreadId.xy] = float3(1.0, 0.0, 0.0);
+
 }
