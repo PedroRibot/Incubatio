@@ -6,6 +6,7 @@
 #include "Camera/PlayerCameraManager.h"
 #include "RenderGraphBuilder.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "Materials/MaterialRenderProxy.h"
 #include "Runtime/Engine/Classes/Engine/TextureRenderTarget2D.h"
 
 
@@ -135,58 +136,58 @@ FMatrix ACPP_OSC_to_Material::CreateMatrixFromPositionRotationScale(const FVecto
     //return Matrix;
 }
 
-void ACPP_OSC_to_Material::CreateViewExtension(UTexture2D* Texture) {
-    FRHITexture* TextureRHI = Texture->Resource->GetTexture2DRHI();
+void ACPP_OSC_to_Material::CreateViewExtension(UTextureRenderTarget2D* pDataTexture) {
+    //FRHITexture* TextureRHI = Texture->Resource->GetTexture2DRHI();
     //FRHITexture* TextureRHI = Texture->Resource->GetTexture2DRHI();
     //FRDGTextureRef TextureRDG = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(TextureRHI, TEXT("MyTexture")));
-    MyViewExtension = FSceneViewExtensions::NewExtension<FMyViewExtension>(TextureRHI);
+    MyViewExtension = FSceneViewExtensions::NewExtension<FMyViewExtension>(FLinearColor::Green, pDataTexture);
 }
 
-void ACPP_OSC_to_Material::UpdateTexturePostProcessing(UTexture2D* Texture) 
-{
-    FRHITexture* TextureRHI = Texture->Resource->GetTexture2DRHI();
-    MyViewExtension->UpdateTexture(TextureRHI);
-}
+//void ACPP_OSC_to_Material::UpdateTexturePostProcessing(UTexture2D* Texture) 
+//{
+//    FRHITexture* TextureRHI = Texture->Resource->GetTexture2DRHI();
+//    MyViewExtension->UpdateTexture(TextureRHI);
+//}
 
-UTexture2D* ACPP_OSC_to_Material::GetTextureFromRenderTarget(UTextureRenderTarget2D* RTarget)
-{
-    //FRenderTarget* RenderTarget = GameThread_GetRenderTargetResource();
- /*   EPixelFormat pixelFormat = RTarget->GetFormat();*/
-   
-    const ETextureSourceFormat TextureFormat = RTarget->GetTextureFormatForConversionToTexture2D();
+//UTexture2D* ACPP_OSC_to_Material::GetTextureFromRenderTarget(UTextureRenderTarget2D* RTarget)
+//{
+//    //FRenderTarget* RenderTarget = GameThread_GetRenderTargetResource();
+// /*   EPixelFormat pixelFormat = RTarget->GetFormat();*/
+//   
+//    const ETextureSourceFormat TextureFormat = RTarget->GetTextureFormatForConversionToTexture2D();
+//
+//    ConvertedDataTexture2D = RTarget->ConstructTexture2D(this, "texture", EObjectFlags::RF_NoFlags, CTF_DeferCompression);
+//
+//    /*UE_LOG(LogTemp, Warning, TEXT("The Texture2D pointer address is: %d"), Texture2D);
+//    UE_LOG(LogTemp, Warning, TEXT("The EPixelFormat is: %d"), pixelFormat);
+//    UE_LOG(LogTemp, Warning, TEXT("The TextureFormat is: %d"), TextureFormat);*/
+//
+//    RTarget->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+//#if WITH_EDITORONLY_DATA
+//    ConvertedDataTexture2D->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+//#endif
+//    ConvertedDataTexture2D->SRGB = 1;
+//    ConvertedDataTexture2D->UpdateResource();
+//
+//    return ConvertedDataTexture2D;
+//}
 
-    ConvertedDataTexture2D = RTarget->ConstructTexture2D(this, "texture", EObjectFlags::RF_NoFlags, CTF_DeferCompression);
-
-    /*UE_LOG(LogTemp, Warning, TEXT("The Texture2D pointer address is: %d"), Texture2D);
-    UE_LOG(LogTemp, Warning, TEXT("The EPixelFormat is: %d"), pixelFormat);
-    UE_LOG(LogTemp, Warning, TEXT("The TextureFormat is: %d"), TextureFormat);*/
-
-    RTarget->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-#if WITH_EDITORONLY_DATA
-    ConvertedDataTexture2D->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-#endif
-    ConvertedDataTexture2D->SRGB = 1;
-    ConvertedDataTexture2D->UpdateResource();
-
-    return ConvertedDataTexture2D;
-}
-
-UTexture2D* ACPP_OSC_to_Material::UpdateTextureFromRenderTarget(UTextureRenderTarget2D* RTarget)
-{
-    TArray<FColor> SurfData;
-    FRenderTarget* RenderTarget = RTarget->GameThread_GetRenderTargetResource();
-    RenderTarget->ReadPixels(SurfData);
-
-    // Lock and copies the data between the textures
-    void* TextureData = ConvertedDataTexture2D->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
-    const int32 TextureDataSize = SurfData.Num() * 4;
-    FMemory::Memcpy(TextureData, SurfData.GetData(), TextureDataSize);
-    ConvertedDataTexture2D->PlatformData->Mips[0].BulkData.Unlock();
-    // Apply Texture changes to GPU memory
-    ConvertedDataTexture2D->UpdateResource();
-
-    return ConvertedDataTexture2D;
-}
+//UTexture2D* ACPP_OSC_to_Material::UpdateTextureFromRenderTarget(UTextureRenderTarget2D* RTarget)
+//{
+//    TArray<FColor> SurfData;
+//    FRenderTarget* RenderTarget = RTarget->GameThread_GetRenderTargetResource();
+//    RenderTarget->ReadPixels(SurfData);
+//
+//    // Lock and copies the data between the textures
+//    void* TextureData = ConvertedDataTexture2D->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
+//    const int32 TextureDataSize = SurfData.Num() * 4;
+//    FMemory::Memcpy(TextureData, SurfData.GetData(), TextureDataSize);
+//    ConvertedDataTexture2D->PlatformData->Mips[0].BulkData.Unlock();
+//    // Apply Texture changes to GPU memory
+//    ConvertedDataTexture2D->UpdateResource();
+//
+//    return ConvertedDataTexture2D;
+//}
 
 FQuat ACPP_OSC_to_Material::AdaptRotations(const FQuat& originalRotation, int insideCount, float x, float y, float z, int bone)
 {

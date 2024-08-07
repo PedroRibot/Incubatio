@@ -4,12 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Kismet/BlueprintAsyncActionBase.h"
 #include "Engine/Texture2D.h"
 #include "Math/Vector.h"
 #include "Math/Quat.h"
 #include "Math/Matrix.h"
 #include "RenderGraphResources.h"
 #include "RenderResource.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "UnrealClient.h"
+#include "Materials/MaterialRenderProxy.h"
+
+
 #include "CPP_OSC_to_Material.generated.h"
 
 
@@ -18,7 +24,6 @@ class INCUBATIO_API ACPP_OSC_to_Material : public AActor
 {
 	GENERATED_BODY()
 	TSharedPtr<class FMyViewExtension, ESPMode::ThreadSafe> MyViewExtension;
-	UTexture2D* ConvertedDataTexture2D;
 public:	
 	// Sets default values for this actor's properties
 	ACPP_OSC_to_Material();
@@ -40,12 +45,12 @@ public:
 		FMatrix CreateMatrixFromPositionRotationScale(const FVector& Position, const FQuat& Rotation, const FVector& Scale);
 	UFUNCTION(BlueprintCallable)
 		FQuat AdaptRotations(const FQuat& originalRotation, int insideCount, float x, float y, float z, int bone);
-	UFUNCTION(BlueprintCallable)
-		void CreateViewExtension(UTexture2D* Texture);
 	UFUNCTION(BlueprintCallable, Category = "Texture")
-		UTexture2D* GetTextureFromRenderTarget(UTextureRenderTarget2D* RTarget);
-	UFUNCTION(BlueprintCallable, Category = "Texture")
-		void UpdateTexturePostProcessing(UTexture2D* Texture);
-	UFUNCTION(BlueprintCallable, Category = "Texture")
-		UTexture2D* UpdateTextureFromRenderTarget(UTextureRenderTarget2D* RTarget);
+		void CreateViewExtension(UTextureRenderTarget2D* pDataTexture);
+	/*UFUNCTION(BlueprintCallable, Category = "Texture")
+		UTexture2D* GetTextureFromRenderTarget(UTextureRenderTarget2D* RTarget);*/
+	/*UFUNCTION(BlueprintCallable, Category = "Texture")
+		void UpdateTexturePostProcessing(UTexture2D* Texture);*/
+	/*UFUNCTION(BlueprintCallable, Category = "Texture")
+		UTexture2D* UpdateTextureFromRenderTarget(UTextureRenderTarget2D* RTarget);*/
 };
