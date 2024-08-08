@@ -2796,7 +2796,7 @@ float4 CombineMainPS(float4 SvPosition : SV_POSITION) : SV_Target0
 
 // SHADOW implementation
     float lightStrength = 1;
-    if (f.shadowStrength > 1)
+    if (f.shadowStrength > 0)
     {
         float3 lightToSurfaceVec = p - f.lightPosition;
         float lightToSurfaceDist = length(lightToSurfaceVec);
