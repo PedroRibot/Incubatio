@@ -53,7 +53,7 @@ public:
 
 		// SHADER_PARAMETER_STRUCT_REF(FMyCustomStruct, MyCustomStruct)
 
-		SHADER_PARAMETER_RDG_TEXTURE_UAV(RWTexture2D, DataTexture)
+		SHADER_PARAMETER_TEXTURE(RWTexture2D, DataTexture)
 		
 		SHADER_PARAMETER_RDG_TEXTURE_UAV(RWTexture2D, RenderTarget)
 		
@@ -118,6 +118,8 @@ void FSimpleComputeShaderInterface::DispatchRenderThread(FRHICommandListImmediat
 
 		bool bIsShaderValid = ComputeShader.IsValid();
 
+		
+
 		if (bIsShaderValid) {
 			FSimpleComputeShader::FParameters* PassParameters = GraphBuilder.AllocParameters<FSimpleComputeShader::FParameters>();
 
@@ -127,13 +129,10 @@ void FSimpleComputeShaderInterface::DispatchRenderThread(FRHICommandListImmediat
 			FRDGTextureRef TargetTexture = RegisterExternalTexture(GraphBuilder, Params.RenderTarget->GetRenderTargetTexture(), TEXT("SimpleComputeShader_RT"));
 			PassParameters->RenderTarget = GraphBuilder.CreateUAV(TmpTexture);
 
-			FRDGTextureDesc DataDesc(FRDGTextureDesc::Create2D(Params.DataTexture->GetSizeXY(), PF_A16B16G16R16, FClearValueBinding::White, TexCreate_RenderTargetable | TexCreate_ShaderResource | TexCreate_UAV));
-			FRDGTextureRef DataTmp = GraphBuilder.CreateTexture(DataDesc, TEXT("SimpleComputeShader_TempTexture"));
-			//FRDGTextureRef FRDGData = RegisterExternalTexture(GraphBuilder, Params.DataTexture->GetRenderTargetTexture(), TEXT("DataTexT"));
-			PassParameters->DataTexture = GraphBuilder.CreateUAV(DataTmp);
 
-			/*FRDGTextureRef DataTexture =RegisterExternalTexture(GraphBuilder, Params.DataTexture->GetRenderTargetTexture(), TEXT("SimpleComputeShader_DataTexture"));
-			PassParameters->DataTexture = GraphBuilder.(DataTexture);*/
+			/*FRDGTextureRef DataTex = RegisterExternalTexture(GraphBuilder, Params.DataTexture->GetRenderTargetTexture(), TEXT("SimpleComputeShader_DataTexture"));*/
+			PassParameters->DataTexture = Params.DataTexture->GetRenderTargetTexture();
+
 
 			auto GroupCount = FComputeShaderUtils::GetGroupCount(FIntVector(Params.X, Params.Y, Params.Z), FComputeShaderUtils::kGolden2DGroupSize);
 			GraphBuilder.AddPass(
