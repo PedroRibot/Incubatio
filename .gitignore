@@ -111,3 +111,6 @@ aa_Max_Python/Python/ray_marching_python_xsens_bvh_v7_backup/common/__pycache__/
 aa_Max_Python/Python/ray_marching_python_xsens_bvh_v7_backup/common/__pycache__/skeleton.cpython-38.pyc
 aa_Max_Python/Python/ray_marching_python_xsens_bvh_v7_backup/common/__pycache__/utils.cpython-310.pyc
 aa_Max_Python/Python/ray_marching_python_xsens_bvh_v7_backup/common/__pycache__/utils.cpython-38.pyc
+*.pyc
+*.bak
+*.ini
