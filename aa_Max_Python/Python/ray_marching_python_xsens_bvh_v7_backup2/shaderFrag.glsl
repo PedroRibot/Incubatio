@@ -6,8 +6,8 @@ const float MAX_DIST = 100.0;
 const float EPSILON = 0.0001;
 const float PI = 3.1415926535897932384626433832795; // there is no PI defined in GLSL?
 
-const int jointCount = 28;
-const int edgeCount = 27;
+const int jointCount = 23;
+const int edgeCount = 22;
 const int objectCount = 10;
 
 uniform float iGlobalTime;
